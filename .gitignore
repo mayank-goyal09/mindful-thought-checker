@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+.DS_Store
+1.1.0'
+
+# Ignore large model files (>100MB) incompatible with default GitHub push
+MentalHealth_AI_Model/model.onnx.data
+MentalHealth_AI_Model/model.safetensors
