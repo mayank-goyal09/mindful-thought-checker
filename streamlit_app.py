@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 # 2. Inject Glassmorphism & Modern Production CSS
-st.markdown("""
+st.html("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
@@ -256,7 +256,7 @@ st.markdown("""
         border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 </style>
-""", unsafe_allow_html=True)
+""")
 
 # 3. Setup URLs & Paths
 API_URL = "http://127.0.0.1:8000/predict"
@@ -288,7 +288,7 @@ DISTORTION_BADGES = {
 }
 
 # 4. Header Hero Section
-st.markdown("""
+st.html("""
 <div class="glass-hero">
     <div class="hero-title">
         <span>🧠</span> Mindful Cognitive Disorder AI
@@ -298,16 +298,16 @@ st.markdown("""
         <strong>DistilBERT</strong> & optimized with <strong>ONNX Runtime</strong> for ultra-low latency CBT analysis.
     </div>
 </div>
-""", unsafe_allow_html=True)
+""")
 
 # 5. Sidebar System Status
 with st.sidebar:
-    st.markdown("""
+    st.html("""
     <div style="text-align: center; padding: 0.5rem 0 1rem 0;">
         <span style="font-size: 2.8rem;">⚙️</span>
         <h3 style="margin-top: 0.5rem; color: #f8fafc; font-weight: 700;">System Control</h3>
     </div>
-    """, unsafe_allow_html=True)
+    """)
     
     api_online = False
     try:
@@ -318,7 +318,7 @@ with st.sidebar:
         pass
         
     if api_online:
-        st.markdown("""
+        st.html("""
         <div class="glass-card" style="padding: 1rem; border-color: rgba(34, 197, 94, 0.4);">
             <div style="display: flex; align-items: center; gap: 0.6rem;">
                 <span style="color: #4ade80; font-size: 1.2rem;">🟢</span>
@@ -328,9 +328,9 @@ with st.sidebar:
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     else:
-        st.markdown("""
+        st.html("""
         <div class="glass-card" style="padding: 1rem; border-color: rgba(245, 158, 11, 0.4);">
             <div style="display: flex; align-items: center; gap: 0.6rem;">
                 <span style="color: #fbbf24; font-size: 1.2rem;">🟡</span>
@@ -340,7 +340,7 @@ with st.sidebar:
                 </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     st.markdown("---")
     st.markdown("### 💡 CBT Insight")
@@ -380,7 +380,7 @@ with tab_analyzer:
     )
     
     # Sample Chips / Buttons for Quick Testing (Using callbacks to update session state safely)
-    st.markdown("<span style='font-size: 0.85rem; color: #94a3b8; font-weight: 600;'>TRY SAMPLE THOUGHTS:</span>", unsafe_allow_html=True)
+    st.html("<span style='font-size: 0.85rem; color: #94a3b8; font-weight: 600;'>TRY SAMPLE THOUGHTS:</span>")
     chip_cols = st.columns(3)
     with chip_cols[0]:
         st.button(
@@ -404,7 +404,7 @@ with tab_analyzer:
             args=("I should never make mistakes at work. If I make a mistake, I am useless.",)
         )
             
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    st.html("<div style='height: 10px;'></div>")
     analyze_btn = st.button("⚡ Run Neural Prediction", type="primary", use_container_width=True)
     
     if analyze_btn:
@@ -464,10 +464,10 @@ with tab_analyzer:
                 emoji = DISTORTION_EMOJIS.get(distortion_name, "🧠")
                 badge_class = DISTORTION_BADGES.get(distortion_name, "badge-neutral")
 
-                st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+                st.html("<div style='height: 20px;'></div>")
                 
                 # Top Summary Card
-                st.markdown(f"""
+                st.html(f"""
                 <div class="glass-card" style="border-color: rgba(56, 189, 248, 0.3);">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                         <div>
@@ -491,7 +491,7 @@ with tab_analyzer:
                         </div>
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
 
                 # Production Grid Layout (2 Columns)
                 col_left, col_right = st.columns([1.3, 1])
@@ -499,30 +499,30 @@ with tab_analyzer:
                 with col_left:
                     if distortion_name != "Neutral":
                         st.markdown("### 💬 CBT Cognitive Reframing Q&A")
-                        st.markdown("<p style='color: #94a3b8; font-size: 0.9rem;'>Step-by-step cognitive inquiry to dismantle distorted thoughts:</p>", unsafe_allow_html=True)
+                        st.html("<p style='color: #94a3b8; font-size: 0.9rem;'>Step-by-step cognitive inquiry to dismantle distorted thoughts:</p>")
                         
                         # Animated Q&A Boxes
                         for i, q in enumerate(details["reframing_questions"], 1):
-                            st.markdown(f"""
+                            st.html(f"""
                             <div class="qna-box">
                                 <div class="qna-question">
                                     <span style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700;">Q{i}</span>
                                     <span>{q}</span>
                                 </div>
                             </div>
-                            """, unsafe_allow_html=True)
+                            """)
 
                         # Reframing Strategy Box
-                        st.markdown(f"""
+                        st.html(f"""
                         <div class="advice-box">
                             <strong style="color: #38bdf8; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
                                 💡 Clinical Strategy:
                             </strong>
                             <p style="margin-top: 0.4rem; margin-bottom: 0;">{details['reframing_advice']}</p>
                         </div>
-                        """, unsafe_allow_html=True)
+                        """)
 
-                        st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
+                        st.html("<div style='height: 15px;'></div>")
                         
                         # Interactive Reframing Input Card
                         st.markdown("#### ✏️ Write your Reframed Balanced Thought:")
@@ -537,11 +537,11 @@ with tab_analyzer:
                             if reframed_input.strip():
                                 st.balloons()
                                 st.success("🎉 Reframed successfully! Excellent cognitive work.")
-                                st.markdown("""
+                                st.html("""
                                 <div class="glass-card" style="border-color: rgba(34, 197, 94, 0.4);">
                                     <h4 style="color: #4ade80; margin-top: 0;">Comparison View</h4>
                                 </div>
-                                """, unsafe_allow_html=True)
+                                """)
                                 comp_df = pd.DataFrame({
                                     "Original Distorted Thought": [user_input],
                                     "Reframed Balanced Thought": [reframed_input]
@@ -551,17 +551,17 @@ with tab_analyzer:
                                 st.warning("Please type your reframed thought above.")
                     else:
                         st.balloons()
-                        st.markdown("""
+                        st.html("""
                         <div class="glass-card" style="border-color: rgba(34, 197, 94, 0.4); text-align: center; padding: 2rem;">
                             <span style="font-size: 3rem;">⚖️🌟</span>
                             <h3 style="color: #4ade80; margin-top: 0.5rem;">Balanced Thinking Detected</h3>
                             <p style="color: #cbd5e1;">Your thought process is grounded in objective reality. No cognitive distortions were found!</p>
                         </div>
-                        """, unsafe_allow_html=True)
+                        """)
 
                 with col_right:
                     st.markdown("### 📊 Neural Probability Distribution")
-                    st.markdown("<p style='color: #94a3b8; font-size: 0.9rem;'>Softmax probability spectrum across all distortion classes:</p>", unsafe_allow_html=True)
+                    st.html("<p style='color: #94a3b8; font-size: 0.9rem;'>Softmax probability spectrum across all distortion classes:</p>")
                     
                     # Custom Animated HTML Bars for Probabilities
                     for d_name, p_val in sorted(result["all_probabilities"].items(), key=lambda x: x[1], reverse=True):
@@ -570,7 +570,7 @@ with tab_analyzer:
                         bar_color = "linear-gradient(90deg, #38bdf8, #818cf8)" if is_winner else "linear-gradient(90deg, #334155, #475569)"
                         border_glow = "border: 1px solid rgba(56, 189, 248, 0.5);" if is_winner else "border: 1px solid rgba(255, 255, 255, 0.05);"
                         
-                        st.markdown(f"""
+                        st.html(f"""
                         <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(10px); border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 0.75rem; {border_glow}">
                             <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.35rem;">
                                 <span style="font-weight: 600; color: {'#38bdf8' if is_winner else '#cbd5e1'};">
@@ -584,13 +584,13 @@ with tab_analyzer:
                                 <div style="width: {p_val*100}%; background: {bar_color}; height: 100%; border-radius: 999px; transition: width 0.8s ease-in-out;"></div>
                             </div>
                         </div>
-                        """, unsafe_allow_html=True)
+                        """)
 
 # ----------------- TAB 2: DISTORTION CATALOG (PRODUCTION GRID) -----------------
 with tab_catalog:
     st.markdown("### 📚 Cognitive Distortion Catalog")
-    st.markdown("<p style='color: #94a3b8;'>Comprehensive production reference matrix of cognitive patterns identified by the model:</p>", unsafe_allow_html=True)
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    st.html("<p style='color: #94a3b8;'>Comprehensive production reference matrix of cognitive patterns identified by the model:</p>")
+    st.html("<div style='height: 10px;'></div>")
 
     from app.distortions_db import DISTORTIONS_MAP
 
@@ -632,95 +632,94 @@ with tab_catalog:
             </div>
             <div style="height: 15px;"></div>
             """
-            st.markdown(card_html, unsafe_allow_html=True)
-
+            st.html(card_html)
 
 # ----------------- TAB 3: SYSTEM ARCHITECTURE -----------------
 with tab_architecture:
     st.markdown("### ⚡ Production Architecture & Performance")
-    st.markdown("<p style='color: #94a3b8;'>Technical benchmarks comparing PyTorch inference vs ONNX Runtime optimization:</p>", unsafe_allow_html=True)
+    st.html("<p style='color: #94a3b8;'>Technical benchmarks comparing PyTorch inference vs ONNX Runtime optimization:</p>")
     
     # Stat Metrics Grid
     m1, m2, m3, m4 = st.columns(4)
     with m1:
-        st.markdown("""
+        st.html("""
         <div class="glass-card" style="text-align: center; padding: 1.2rem;">
             <div style="font-size: 2rem;">⚡</div>
             <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 600;">LATENCY REDUCTION</div>
-            <div style="color: #38bdf8; font-size: 1.8rem; font-weight: 800; margin-top: 0.2rem;">> 80%</div>
-            <div style="color: #4ade80; font-size: 0.75rem;">150ms ➔ ~18ms</div>
+            <div style="color: #38bdf8; font-size: 1.8rem; font-weight: 800; margin-top: 0.2rem;">&gt; 80%</div>
+            <div style="color: #4ade80; font-size: 0.75rem;">150ms &#10142; ~18ms</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with m2:
-        st.markdown("""
+        st.html("""
         <div class="glass-card" style="text-align: center; padding: 1.2rem;">
             <div style="font-size: 2rem;">💾</div>
             <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 600;">RAM FOOTPRINT</div>
             <div style="color: #a855f7; font-size: 1.8rem; font-weight: 800; margin-top: 0.2rem;">250 MB</div>
             <div style="color: #4ade80; font-size: 0.75rem;">PyTorch: ~1.5 GB</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with m3:
-        st.markdown("""
+        st.html("""
         <div class="glass-card" style="text-align: center; padding: 1.2rem;">
             <div style="font-size: 2rem;">🎯</div>
             <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 600;">MODEL FORMAT</div>
             <div style="color: #f43f5e; font-size: 1.8rem; font-weight: 800; margin-top: 0.2rem;">ONNX</div>
             <div style="color: #cbd5e1; font-size: 0.75rem;">DistilBERT FP32</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with m4:
-        st.markdown("""
+        st.html("""
         <div class="glass-card" style="text-align: center; padding: 1.2rem;">
             <div style="font-size: 2rem;">🌐</div>
             <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 600;">DECOUPLED GATEWAY</div>
             <div style="color: #fbbf24; font-size: 1.8rem; font-weight: 800; margin-top: 0.2rem;">FastAPI</div>
             <div style="color: #cbd5e1; font-size: 0.75rem;">REST + Local Fallback</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+    st.html("<div style='height: 10px;'></div>")
     st.markdown("#### 🔄 Inference Execution Pipeline:")
 
     # Pipeline Flow Grid
     p1, p2, p3, p4, p5 = st.columns(5)
     with p1:
-        st.markdown("""
+        st.html("""
         <div class="arch-node">
             <span style="font-size: 1.8rem;">✍️</span>
             <h5 style="color: #f8fafc; margin: 0.5rem 0 0.2rem 0;">1. Text Input</h5>
             <span style="font-size: 0.75rem; color: #94a3b8;">User prompt / API payload</span>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with p2:
-        st.markdown("""
+        st.html("""
         <div class="arch-node">
             <span style="font-size: 1.8rem;">🔤</span>
             <h5 style="color: #f8fafc; margin: 0.5rem 0 0.2rem 0;">2. Tokenizer</h5>
             <span style="font-size: 0.75rem; color: #94a3b8;">DistilBERT Fast (NumPy)</span>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with p3:
-        st.markdown("""
+        st.html("""
         <div class="arch-node">
             <span style="font-size: 1.8rem;">⚡</span>
             <h5 style="color: #f8fafc; margin: 0.5rem 0 0.2rem 0;">3. ONNX Session</h5>
             <span style="font-size: 0.75rem; color: #94a3b8;">CPU ExecutionProvider</span>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with p4:
-        st.markdown("""
+        st.html("""
         <div class="arch-node">
             <span style="font-size: 1.8rem;">📊</span>
             <h5 style="color: #f8fafc; margin: 0.5rem 0 0.2rem 0;">4. Softmax</h5>
             <span style="font-size: 0.75rem; color: #94a3b8;">Probabilities & Confidence</span>
         </div>
-        """, unsafe_allow_html=True)
+        """)
     with p5:
-        st.markdown("""
+        st.html("""
         <div class="arch-node">
             <span style="font-size: 1.8rem;">💡</span>
             <h5 style="color: #f8fafc; margin: 0.5rem 0 0.2rem 0;">5. CBT DB</h5>
             <span style="font-size: 0.75rem; color: #94a3b8;">Distortion Q&A Reframe</span>
         </div>
-        """, unsafe_allow_html=True)
+        """)
