@@ -603,7 +603,8 @@ with tab_catalog:
         target_col = cat_cols[idx % 2]
         
         with target_col:
-            st.markdown(f"""
+            examples_html = "".join([f'<div class="example-chip">💬 "{ex}"</div>' for ex in data["examples"]])
+            card_html = f"""
             <div class="catalog-card">
                 <div class="catalog-header">
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -621,24 +622,18 @@ with tab_catalog:
                 
                 <div style="margin-bottom: 1rem;">
                     <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 700; margin-bottom: 0.4rem;">REAL-WORLD EXAMPLES:</div>
-            """, unsafe_allow_html=True)
-            
-            for ex in data["examples"]:
-                st.markdown(f"""
-                <div class="example-chip">
-                    💬 "{ex}"
+                    {examples_html}
                 </div>
-                """, unsafe_allow_html=True)
                 
-            st.markdown(f"""
-                </div>
                 <div style="background: rgba(56, 189, 248, 0.08); border-left: 3px solid #38bdf8; padding: 0.75rem 1rem; border-radius: 8px;">
                     <strong style="color: #38bdf8; font-size: 0.85rem;">💡 Reframing Advice:</strong>
                     <p style="color: #94a3b8; font-size: 0.85rem; margin: 0.25rem 0 0 0;">{data['reframing_advice']}</p>
                 </div>
             </div>
             <div style="height: 15px;"></div>
-            """, unsafe_allow_html=True)
+            """
+            st.markdown(card_html, unsafe_allow_html=True)
+
 
 # ----------------- TAB 3: SYSTEM ARCHITECTURE -----------------
 with tab_architecture:
