@@ -7,17 +7,17 @@
 [![Typing SVG](https://readme-typing-svg.demolab.com?font=Plus+Jakarta+Sans&weight=700&size=30&duration=3000&pause=1000&color=38BDF8&center=true&vCenter=true&width=900&height=50&lines=Real-Time+Cognitive+Distortion+Detection;DistilBERT+%2B+ONNX+Runtime+Optimization;CBT+Reframing+%26+Cognitive+Inquiry;Decoupled+FastAPI+%26+Streamlit+HUD)](https://git.io/typing-svg)
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)
-![DistilBERT](https://img.shields.io/badge/Model-DistilBERT_FP32-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
-![ONNX Runtime](https://img.shields.io/badge/Inference-ONNX_Runtime-00599C?style=for-the-badge&logo=onnx&logoColor=white)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Live_Demo-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://mindful-thought-checker-project.streamlit.app/)
 ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Frontend-Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![ONNX Runtime](https://img.shields.io/badge/Inference-ONNX_Runtime-00599C?style=for-the-badge&logo=onnx&logoColor=white)
+![DistilBERT](https://img.shields.io/badge/Model-DistilBERT_FP32-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
 
 <br/>
 
 ### **Where Cognitive Behavioral Therapy Meets Deep Neural Optimization.**
 ### **Transform negative & irrational thought patterns into balanced, grounded reality in sub-20ms latency.** 🧠✨
 
-### **🌐 [Launch Local Dashboard: `http://localhost:8501`](http://localhost:8501)**
+### **🌐 [Live Demo: mindful-thought-checker-project.streamlit.app](https://mindful-thought-checker-project.streamlit.app/)**
 
 </div>
 
