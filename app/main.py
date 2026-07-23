@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional
 import uvicorn
@@ -12,6 +13,16 @@ app = FastAPI(
     description="A production-grade REST API serving a DistilBERT model optimized via ONNX Runtime to detect cognitive distortions in text.",
     version="1.0.0"
 )
+
+# Enable CORS for external products
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # Input Pydantic Model
 class PredictionRequest(BaseModel):
