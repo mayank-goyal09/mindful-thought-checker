@@ -11,6 +11,18 @@ from app.main import app as fastapi_app
 from app.predictor import CognitiveDistortionPredictor
 from app.distortions_db import DISTORTIONS_MAP
 
+# ZeroGPU compatibility mock
+try:
+    import spaces
+except ImportError:
+    class spaces:
+        @staticmethod
+        def GPU(fn=None, duration=None):
+            if fn is None:
+                return lambda f: f
+            return fn
+
+
 # 1. Custom premium CSS for Gradio
 custom_css = """
 body, .gradio-container {
@@ -145,7 +157,9 @@ with gr.Blocks() as demo:
     )
     
     # Model execution helper
+    @spaces.GPU
     def analyze_thought(text):
+
         if not text or not text.strip():
             return "Please type or select a thought to analyze.", {}
             
