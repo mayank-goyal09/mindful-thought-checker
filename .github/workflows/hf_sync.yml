@@ -12,42 +12,32 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          lfs: true
 
       - name: Deploy to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. Initialize Git LFS on the runner
-          git lfs install
+          # 1. Clone the existing Hugging Face Space (without downloading LFS files to save time)
+          git config --global filter.lfs.smudge "git-lfs smudge --skip"
+          git config --global filter.lfs.required false
+          git clone https://mayankg09:$HF_TOKEN@huggingface.co/spaces/mayankg09/mindful-thought-checker hf_space
           
-          # 2. Create a clean deployment folder
-          mkdir deploy_dir
-          cp -r app deploy_dir/
-          mkdir -p deploy_dir/MentalHealth_AI_Model
-          cp MentalHealth_AI_Model/config.json deploy_dir/MentalHealth_AI_Model/
-          cp MentalHealth_AI_Model/model.onnx deploy_dir/MentalHealth_AI_Model/
-          cp MentalHealth_AI_Model/model.onnx.data deploy_dir/MentalHealth_AI_Model/
-          cp MentalHealth_AI_Model/tokenizer.json deploy_dir/MentalHealth_AI_Model/
-          cp MentalHealth_AI_Model/tokenizer_config.json deploy_dir/MentalHealth_AI_Model/
-          cp requirements.txt deploy_dir/
-          cp run.py deploy_dir/
-          cp README.md deploy_dir/
+          # 2. Copy the updated code files into the cloned Space folder
+          cp -r app hf_space/
+          cp requirements.txt hf_space/
+          cp run.py hf_space/
+          cp README.md hf_space/
           
-          # 3. Initialize a fresh git repository in the deployment folder
-          cd deploy_dir
-          git init -b main
+          # 3. Commit and push back to Hugging Face
+          cd hf_space
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          
-          # 4. Set up LFS tracking for the model weights
-          git lfs track "*.onnx.data"
-          git lfs track "*.safetensors"
-          git add .gitattributes
-          
-          # 5. Add all files, commit, and force push to Hugging Face Space
           git add .
-          git commit -m "Automated deployment from GitHub Actions"
-          git push --force https://mayankg09:$HF_TOKEN@huggingface.co/spaces/mayankg09/mindful-thought-checker main
+          
+          # Only commit and push if there are changes
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Automated deployment from GitHub Actions"
+            git push origin main
+          else
+            echo "No changes to deploy."
+          fi
