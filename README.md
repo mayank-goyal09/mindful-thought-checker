@@ -1,6 +1,19 @@
+---
+title: Mindful Thought Checker
+emoji: 🧠
+colorFrom: blue
+colorTo: indigo
+sdk: gradio
+sdk_version: 4.44.1
+app_file: run.py
+pinned: false
+license: mit
+---
+
 <div align="center">
 
 # 🧠 Mindful Cognitive Disorder AI — Real-Time CBT Engine
+
 
 ### 🔮 **Enterprise Cognitive Distortion Detection & Reframing System**
 
