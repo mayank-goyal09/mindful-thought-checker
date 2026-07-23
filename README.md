@@ -261,3 +261,4 @@ Open your browser and navigate to: 👉 **`http://localhost:8501`**
 ![Footer](https://capsule-render.vercel.app/api?type=waving&color=0:0a0f1d,100:38bdf8&height=120&section=footer)
 
 </div>
+
