@@ -1,3 +1,14 @@
+# ZeroGPU compatibility mock (must be imported first)
+try:
+    import spaces
+except ImportError:
+    class spaces:
+        @staticmethod
+        def GPU(fn=None, duration=None):
+            if fn is None:
+                return lambda f: f
+            return fn
+
 import os
 import sys
 import time
@@ -10,17 +21,6 @@ from fastapi import FastAPI
 from app.main import app as fastapi_app
 from app.predictor import CognitiveDistortionPredictor
 from app.distortions_db import DISTORTIONS_MAP
-
-# ZeroGPU compatibility mock
-try:
-    import spaces
-except ImportError:
-    class spaces:
-        @staticmethod
-        def GPU(fn=None, duration=None):
-            if fn is None:
-                return lambda f: f
-            return fn
 
 
 # 1. Custom premium CSS for Gradio
@@ -71,6 +71,92 @@ body, .gradio-container {
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 """
+
+# Model execution helper (defined at the module level for Hugging Face ZeroGPU AST parser)
+@spaces.GPU
+def analyze_thought(text):
+    if not text or not text.strip():
+        return "Please type or select a thought to analyze.", {}
+        
+    try:
+        model_dir = os.environ.get("MODEL_DIR", "./MentalHealth_AI_Model")
+        predictor = CognitiveDistortionPredictor.get_instance(model_dir)
+        res = predictor.predict(text)
+        
+        label_id = res["label_id"]
+        confidence = res["confidence"]
+        latency_ms = res["latency_ms"]
+        probs = res["probabilities"]
+        
+        details = DISTORTIONS_MAP.get(label_id)
+        if details is None:
+            return f"Error: Label ID {label_id} not found.", {}
+            
+        all_probs_named = {
+            DISTORTIONS_MAP[idx]["name"]: float(prob) for idx, prob in probs.items()
+        }
+        
+        # Format custom HTML result
+        emoji_map = {
+            "Catastrophizing": "🌋",
+            "Mental Filter": "🔍",
+            "Neutral": "⚖️",
+            "Personalization": "🪞",
+            "Should Statements": "📏"
+        }
+        emoji = emoji_map.get(details['name'], "🧠")
+        
+        reframing_questions_html = "".join([
+            f'<div style="background: rgba(15,23,42,0.6); margin: 0.5rem 0; padding: 0.75rem 1rem; border-left: 3px solid #38bdf8; border-radius: 8px; font-weight: 500; font-size: 0.95rem;">Q{i}: {q}</div>'
+            for i, q in enumerate(details["reframing_questions"], 1)
+        ])
+        
+        html_result = f"""
+        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; padding: 1.5rem; text-align: left; box-shadow: 0 10px 25px rgba(56,189,248,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+                <div>
+                    <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 9999px; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">{details['name']}</span>
+                    <h3 style="margin: 0.5rem 0 0 0; font-size: 1.4rem; color: #f8fafc; font-weight: 700;">{emoji} {details['name']}</h3>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; display: block; text-transform: uppercase;">Confidence</span>
+                    <strong style="color: #38bdf8; font-size: 1.3rem; font-weight: 800;">{confidence:.1%}</strong>
+                </div>
+            </div>
+            
+            <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0 0 1rem 0; line-height: 1.5;">{details['description']}</p>
+        """
+        
+        if details['name'] != "Neutral":
+            html_result += f"""
+            <div style="margin-top: 1.25rem;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">💬 CBT Reframing Questions</h4>
+                {reframing_questions_html}
+            </div>
+            
+            <div style="margin-top: 1.25rem; background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(99, 102, 241, 0.12)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1rem; color: #e2e8f0; font-size: 0.95rem; line-height: 1.5;">
+                <strong style="color: #38bdf8; display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">💡 Clinical Advice:</strong>
+                {details['reframing_advice']}
+            </div>
+            """
+        else:
+            html_result += f"""
+            <div style="margin-top: 1.25rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 12px; padding: 1rem; color: #aade80; font-size: 0.95rem; line-height: 1.5; text-align: center;">
+                <strong>⚖️ Balanced Thought Detected</strong><br/>
+                Your thought process is grounded in objective reality. No cognitive distortions were found!
+            </div>
+            """
+            
+        html_result += f"""
+            <div style="margin-top: 1rem; text-align: right; font-size: 0.75rem; color: #64748b;">
+                Inference latency: {latency_ms:.2f}ms
+            </div>
+        </div>
+        """
+        
+        return html_result, all_probs_named
+    except Exception as e:
+        return f'<div style="color: #ef4444; padding: 1rem; border: 1px solid #ef4444; border-radius: 12px;">Error: {str(e)}</div>', {}
 
 # 2. Gradio Web Interface
 with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="sky")) as demo:
@@ -156,92 +242,7 @@ with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="sky")) as demo:
         outputs=input_text
     )
     
-    # Model execution helper
-    @spaces.GPU
-    def analyze_thought(text):
 
-        if not text or not text.strip():
-            return "Please type or select a thought to analyze.", {}
-            
-        try:
-            model_dir = os.environ.get("MODEL_DIR", "./MentalHealth_AI_Model")
-            predictor = CognitiveDistortionPredictor.get_instance(model_dir)
-            res = predictor.predict(text)
-            
-            label_id = res["label_id"]
-            confidence = res["confidence"]
-            latency_ms = res["latency_ms"]
-            probs = res["probabilities"]
-            
-            details = DISTORTIONS_MAP.get(label_id)
-            if details is None:
-                return f"Error: Label ID {label_id} not found.", {}
-                
-            all_probs_named = {
-                DISTORTIONS_MAP[idx]["name"]: float(prob) for idx, prob in probs.items()
-            }
-            
-            # Format custom HTML result
-            emoji_map = {
-                "Catastrophizing": "🌋",
-                "Mental Filter": "🔍",
-                "Neutral": "⚖️",
-                "Personalization": "🪞",
-                "Should Statements": "📏"
-            }
-            emoji = emoji_map.get(details['name'], "🧠")
-            
-            reframing_questions_html = "".join([
-                f'<div style="background: rgba(15,23,42,0.6); margin: 0.5rem 0; padding: 0.75rem 1rem; border-left: 3px solid #38bdf8; border-radius: 8px; font-weight: 500; font-size: 0.95rem;">Q{i}: {q}</div>'
-                for i, q in enumerate(details["reframing_questions"], 1)
-            ])
-            
-            html_result = f"""
-            <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 20px; padding: 1.5rem; text-align: left; box-shadow: 0 10px 25px rgba(56,189,248,0.08);">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.75rem; margin-bottom: 1rem;">
-                    <div>
-                        <span style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 9999px; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">{details['name']}</span>
-                        <h3 style="margin: 0.5rem 0 0 0; font-size: 1.4rem; color: #f8fafc; font-weight: 700;">{emoji} {details['name']}</h3>
-                    </div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 0.75rem; color: #94a3b8; font-weight: 600; display: block; text-transform: uppercase;">Confidence</span>
-                        <strong style="color: #38bdf8; font-size: 1.3rem; font-weight: 800;">{confidence:.1%}</strong>
-                    </div>
-                </div>
-                
-                <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0 0 1rem 0; line-height: 1.5;">{details['description']}</p>
-            """
-            
-            if details['name'] != "Neutral":
-                html_result += f"""
-                <div style="margin-top: 1.25rem;">
-                    <h4 style="margin: 0 0 0.5rem 0; color: #38bdf8; font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">💬 CBT Reframing Questions</h4>
-                    {reframing_questions_html}
-                </div>
-                
-                <div style="margin-top: 1.25rem; background: linear-gradient(135deg, rgba(14, 165, 233, 0.12), rgba(99, 102, 241, 0.12)); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 1rem; color: #e2e8f0; font-size: 0.95rem; line-height: 1.5;">
-                    <strong style="color: #38bdf8; display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">💡 Clinical Advice:</strong>
-                    {details['reframing_advice']}
-                </div>
-                """
-            else:
-                html_result += f"""
-                <div style="margin-top: 1.25rem; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 12px; padding: 1rem; color: #aade80; font-size: 0.95rem; line-height: 1.5; text-align: center;">
-                    <strong>⚖️ Balanced Thought Detected</strong><br/>
-                    Your thought process is grounded in objective reality. No cognitive distortions were found!
-                </div>
-                """
-                
-            html_result += f"""
-                <div style="margin-top: 1rem; text-align: right; font-size: 0.75rem; color: #64748b;">
-                    Inference latency: {latency_ms:.2f}ms
-                </div>
-            </div>
-            """
-            
-            return html_result, all_probs_named
-        except Exception as e:
-            return f'<div style="color: #ef4444; padding: 1rem; border: 1px solid #ef4444; border-radius: 12px;">Error: {str(e)}</div>', {}
 
     submit_btn.click(fn=analyze_thought, inputs=input_text, outputs=[prediction_out, confidence_bar])
 
