@@ -73,7 +73,7 @@ body, .gradio-container {
 """
 
 # 2. Gradio Web Interface
-with gr.Blocks() as demo:
+with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="sky")) as demo:
 
 
     # Hero Banner
@@ -249,9 +249,7 @@ with gr.Blocks() as demo:
 app = gr.mount_gradio_app(
     fastapi_app, 
     demo, 
-    path="/", 
-    css=custom_css, 
-    theme=gr.themes.Soft(primary_hue="sky")
+    path="/"
 )
 
 
