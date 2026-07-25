@@ -11,3 +11,7 @@ ENV/
 # Ignore large model files (>100MB) incompatible with default GitHub push
 MentalHealth_AI_Model/model.onnx.data
 MentalHealth_AI_Model/model.safetensors
+
+# Ignore large raw CSV datasets
+*.csv
+
