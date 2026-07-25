@@ -30,11 +30,12 @@ license: mit
 ### **Where Cognitive Behavioral Therapy Meets Deep Neural Optimization.**
 ### **Transform negative & irrational thought patterns into balanced, grounded reality in sub-20ms latency.** 🧠✨
 
-### **🌐 [Live Demo: mindful-thought-checker-project.streamlit.app](https://mindful-thought-checker-project.streamlit.app/)**
+### **🌐 Live Streamlit Application: [mindful-thought-checker-project.streamlit.app](https://mindful-thought-checker-project.streamlit.app/)**
 
 </div>
 
 ---
+
 
 ## 🧠 **MINDFUL AI: REVOLUTIONIZING COGNITIVE MENTAL HEALTH**
 
