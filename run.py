@@ -246,15 +246,11 @@ with gr.Blocks(css=custom_css, theme=gr.themes.Soft(primary_hue="sky")) as demo:
 
     submit_btn.click(fn=analyze_thought, inputs=input_text, outputs=[prediction_out, confidence_bar])
 
-# 3. Mount Gradio interface to FastAPI app at the root "/" path with custom styling
-app = gr.mount_gradio_app(
-    fastapi_app, 
-    demo, 
-    path="/"
-)
-
+# 3. Attach FastAPI routes (/health, /predict) to Gradio's internal FastAPI app
+# This enables demo.queue().launch() to execute natively, satisfying ZeroGPU startup requirements
+demo.app.include_router(fastapi_app.router)
+app = demo.app
 
 if __name__ == "__main__":
-    import uvicorn
-    # Hugging Face Spaces runs on port 7860
-    uvicorn.run("run:app", host="0.0.0.0", port=7860, reload=False)
+    # Hugging Face Spaces runs on port 7860 using demo.queue().launch()
+    demo.queue().launch(server_name="0.0.0.0", server_port=7860)

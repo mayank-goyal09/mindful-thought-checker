@@ -53,31 +53,38 @@ class PredictionResponse(BaseModel):
 # Global predictor instance
 predictor = None
 
+def _get_predictor():
+    global predictor
+    if predictor is None:
+        model_dir = os.environ.get("MODEL_DIR", "./MentalHealth_AI_Model")
+        try:
+            predictor = CognitiveDistortionPredictor.get_instance(model_dir)
+        except Exception as e:
+            print(f"Error initializing predictor on demand: {str(e)}")
+    return predictor
+
 @app.on_event("startup")
 def startup_event():
-    global predictor
-    model_dir = os.environ.get("MODEL_DIR", "./MentalHealth_AI_Model")
-    try:
-        predictor = CognitiveDistortionPredictor.get_instance(model_dir)
+    _get_predictor()
+    if predictor is not None:
         print("Production model loaded and initialized successfully!")
-    except Exception as e:
-        print(f"Error loading model on startup: {str(e)}")
-        # We don't crash the server immediately, but routes will return 503
 
 @app.get("/health")
 def health_check():
-    if predictor is None:
+    pred = _get_predictor()
+    if pred is None:
         return {"status": "unhealthy", "error": "Model not loaded yet"}
     return {
         "status": "healthy",
         "model_engine": "ONNX Runtime",
-        "model_file": predictor.onnx_path,
+        "model_file": pred.onnx_path,
         "classes_loaded": len(DISTORTIONS_MAP)
     }
 
 @app.post("/predict", response_model=PredictionResponse)
 def predict(request: PredictionRequest):
-    if predictor is None:
+    pred = _get_predictor()
+    if pred is None:
         raise HTTPException(
             status_code=503, 
             detail="Service Unavailable: Model not loaded."
