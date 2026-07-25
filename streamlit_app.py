@@ -1,6 +1,5 @@
 import os
 import streamlit as st
-import requests
 import pandas as pd
 import time
 
@@ -258,8 +257,7 @@ st.html("""
 </style>
 """)
 
-# 3. Setup URLs & Paths
-API_URL = "http://127.0.0.1:8000/predict"
+# 3. Setup Paths
 MODEL_DIR = "./MentalHealth_AI_Model"
 ONNX_PATH = os.path.join(MODEL_DIR, "model.onnx")
 
@@ -287,6 +285,17 @@ DISTORTION_BADGES = {
     "Neutral": "badge-neutral"
 }
 
+# Local Predictor Cache
+@st.cache_resource
+def get_local_predictor():
+    if os.path.exists(ONNX_PATH):
+        try:
+            from app.predictor import CognitiveDistortionPredictor
+            return CognitiveDistortionPredictor.get_instance(MODEL_DIR)
+        except Exception as e:
+            st.error(f"Error loading local predictor: {e}")
+    return None
+
 # 4. Header Hero Section
 st.html("""
 <div class="glass-hero">
@@ -309,34 +318,27 @@ with st.sidebar:
     </div>
     """)
     
-    api_online = False
-    try:
-        health_resp = requests.get("http://127.0.0.1:8000/health", timeout=1)
-        if health_resp.status_code == 200:
-            api_online = True
-    except:
-        pass
-        
-    if api_online:
+    predictor_instance = get_local_predictor()
+    if predictor_instance:
         st.html("""
         <div class="glass-card" style="padding: 1rem; border-color: rgba(34, 197, 94, 0.4);">
             <div style="display: flex; align-items: center; gap: 0.6rem;">
                 <span style="color: #4ade80; font-size: 1.2rem;">🟢</span>
                 <div>
-                    <strong style="color: #f8fafc;">FastAPI Backend</strong><br/>
-                    <span style="color: #4ade80; font-size: 0.8rem;">Status: ONLINE (REST API)</span>
+                    <strong style="color: #f8fafc;">ONNX Model Engine</strong><br/>
+                    <span style="color: #4ade80; font-size: 0.8rem;">Status: ONLINE (Direct Neural Inference)</span>
                 </div>
             </div>
         </div>
         """)
     else:
         st.html("""
-        <div class="glass-card" style="padding: 1rem; border-color: rgba(245, 158, 11, 0.4);">
+        <div class="glass-card" style="padding: 1rem; border-color: rgba(244, 63, 94, 0.4);">
             <div style="display: flex; align-items: center; gap: 0.6rem;">
-                <span style="color: #fbbf24; font-size: 1.2rem;">🟡</span>
+                <span style="color: #fb7185; font-size: 1.2rem;">🔴</span>
                 <div>
-                    <strong style="color: #f8fafc;">FastAPI Offline</strong><br/>
-                    <span style="color: #fbbf24; font-size: 0.8rem;">Fallback: Local ONNX Engine</span>
+                    <strong style="color: #f8fafc;">Model Unreachable</strong><br/>
+                    <span style="color: #fb7185; font-size: 0.8rem;">Check ./MentalHealth_AI_Model</span>
                 </div>
             </div>
         </div>
@@ -414,46 +416,33 @@ with tab_analyzer:
             result = None
             mode_used = ""
             
-            # Method 1: FastAPI
-            if api_online:
-                with st.spinner("🔮 Running inference via FastAPI REST API..."):
+            local_predictor = get_local_predictor()
+            if local_predictor:
+                with st.spinner("⚡ Running inference via ONNX Runtime..."):
                     try:
-                        resp = requests.post(API_URL, json={"text": user_input})
-                        if resp.status_code == 200:
-                            result = resp.json()
-                            mode_used = "FastAPI Backend (REST API)"
+                        from app.distortions_db import DISTORTIONS_MAP
+                        pred_res = local_predictor.predict(user_input)
+                        label_id = pred_res["label_id"]
+                        details = DISTORTIONS_MAP[label_id]
+                        
+                        all_probs_named = {
+                            DISTORTIONS_MAP[idx]["name"]: prob 
+                            for idx, prob in pred_res["probabilities"].items()
+                        }
+                        
+                        result = {
+                            "text": user_input,
+                            "predicted_distortion": details["name"],
+                            "confidence": pred_res["confidence"],
+                            "latency_ms": pred_res["latency_ms"],
+                            "distortion_details": details,
+                            "all_probabilities": all_probs_named
+                        }
+                        mode_used = "Native ONNX Engine"
                     except Exception as e:
-                        st.error(f"API Error: {e}")
-            
-            # Method 2: ONNX Fallback
-            if result is None:
-                local_predictor = get_local_predictor()
-                if local_predictor:
-                    with st.spinner("⚡ Running inference via ONNX Runtime..."):
-                        try:
-                            from app.distortions_db import DISTORTIONS_MAP
-                            pred_res = local_predictor.predict(user_input)
-                            label_id = pred_res["label_id"]
-                            details = DISTORTIONS_MAP[label_id]
-                            
-                            all_probs_named = {
-                                DISTORTIONS_MAP[idx]["name"]: prob 
-                                for idx, prob in pred_res["probabilities"].items()
-                            }
-                            
-                            result = {
-                                "text": user_input,
-                                "predicted_distortion": details["name"],
-                                "confidence": pred_res["confidence"],
-                                "latency_ms": pred_res["latency_ms"],
-                                "distortion_details": details,
-                                "all_probabilities": all_probs_named
-                            }
-                            mode_used = "Local ONNX Runtime Session"
-                        except Exception as e:
-                            st.error(f"ONNX Local Error: {e}")
-                else:
-                    st.error("No model available. Start FastAPI backend or run convert_to_onnx.py.")
+                        st.error(f"ONNX Model Execution Error: {e}")
+            else:
+                st.error("No model available. Ensure ./MentalHealth_AI_Model contains model.onnx.")
 
             # Render Production Grid Results
             if result:
