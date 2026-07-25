@@ -8,10 +8,10 @@ ENV/
 .DS_Store
 1.1.0'
 
-# Ignore large model files (>100MB) incompatible with default GitHub push
-MentalHealth_AI_Model/model.onnx.data
+# Large PyTorch safetensors weights (ONNX model is used for inference)
 MentalHealth_AI_Model/model.safetensors
 
 # Ignore large raw CSV datasets
 *.csv
+
 
