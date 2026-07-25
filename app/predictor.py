@@ -16,7 +16,6 @@ class CognitiveDistortionPredictor:
     def __init__(self, model_dir="./MentalHealth_AI_Model"):
         self.model_dir = model_dir
         self.onnx_path = os.path.join(model_dir, "model.onnx")
-        self.data_path = os.path.join(model_dir, "model.onnx.data")
         
         # Verify the ONNX model exists
         if not os.path.exists(self.onnx_path):
@@ -24,29 +23,6 @@ class CognitiveDistortionPredictor:
                 f"ONNX model file not found at {self.onnx_path}. "
                 "Please run `python convert_to_onnx.py` to generate the ONNX file first."
             )
-
-        # Check if model.onnx.data is missing or is an un-smudged LFS pointer (<1MB)
-        if os.path.exists(self.data_path):
-            file_size = os.path.getsize(self.data_path)
-        else:
-            file_size = 0
-
-        if file_size < 1_000_000:
-            print(f"ONNX data weights file {self.data_path} is missing or LFS pointer ({file_size} bytes). Fetching full weights via hf_hub_download...")
-            try:
-                from huggingface_hub import hf_hub_download
-                repo_id = os.environ.get("SPACE_ID", "mayankg09/mindful-thought-checker")
-                token = os.environ.get("HF_TOKEN", None)
-                downloaded_path = hf_hub_download(
-                    repo_id=repo_id,
-                    filename="MentalHealth_AI_Model/model.onnx.data",
-                    repo_type="space",
-                    token=token,
-                    local_dir="."
-                )
-                print(f"Successfully downloaded full ONNX data file to {downloaded_path}")
-            except Exception as e:
-                print(f"Warning: Failed to fetch LFS weights via hf_hub_download: {e}")
             
         print(f"Loading tokenizer from: {self.model_dir}...")
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_dir)
